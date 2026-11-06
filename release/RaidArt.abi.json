@@ -1,0 +1,113 @@
+[
+ {
+  "inputs": [
+   {
+    "internalType": "uint64",
+    "name": "seed",
+    "type": "uint64"
+   }
+  ],
+  "name": "bossName",
+  "outputs": [
+   {
+    "internalType": "string",
+    "name": "",
+    "type": "string"
+   }
+  ],
+  "stateMutability": "pure",
+  "type": "function"
+ },
+ {
+  "inputs": [
+   {
+    "internalType": "uint64",
+    "name": "seed",
+    "type": "uint64"
+   },
+   {
+    "internalType": "uint32",
+    "name": "level",
+    "type": "uint32"
+   },
+   {
+    "internalType": "bool",
+    "name": "down",
+    "type": "bool"
+   }
+  ],
+  "name": "bossSvg",
+  "outputs": [
+   {
+    "internalType": "string",
+    "name": "",
+    "type": "string"
+   }
+  ],
+  "stateMutability": "pure",
+  "type": "function"
+ },
+ {
+  "inputs": [
+   {
+    "internalType": "uint8",
+    "name": "t",
+    "type": "uint8"
+   }
+  ],
+  "name": "tierName",
+  "outputs": [
+   {
+    "internalType": "string",
+    "name": "",
+    "type": "string"
+   }
+  ],
+  "stateMutability": "pure",
+  "type": "function"
+ },
+ {
+  "inputs": [
+   {
+    "internalType": "uint64",
+    "name": "seed",
+    "type": "uint64"
+   },
+   {
+    "internalType": "uint32",
+    "name": "level",
+    "type": "uint32"
+   },
+   {
+    "internalType": "uint64",
+    "name": "endRound",
+    "type": "uint64"
+   },
+   {
+    "internalType": "uint8",
+    "name": "tier",
+    "type": "uint8"
+   },
+   {
+    "internalType": "bool",
+    "name": "kb",
+    "type": "bool"
+   },
+   {
+    "internalType": "uint64",
+    "name": "damage",
+    "type": "uint64"
+   }
+  ],
+  "name": "trophyURI",
+  "outputs": [
+   {
+    "internalType": "string",
+    "name": "",
+    "type": "string"
+   }
+  ],
+  "stateMutability": "pure",
+  "type": "function"
+ }
+]

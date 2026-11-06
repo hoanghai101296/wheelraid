@@ -1,0 +1,674 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wheel Raid</title>
+<meta name="description" content="A co-op boss raid powered by Squeektoshi's real wheel. Charge while the hamster runs; every settled SqueekCore round hits the boss for its real work.">
+<meta property="og:title" content="Wheel Raid">
+<meta property="og:description" content="A co-op boss raid powered by Squeektoshi's real wheel. Charge while he runs, topple the boss, claim an on-chain trophy.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://wheelraid.imd.site/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://wheelraid.imd.site/og.png">
+<meta name="theme-color" content="#12091a">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --bg:#12091a; --bg2:#1b0f26; --panel:#1f1230; --panel2:#2a1840; --line:#3b2554; --ink:#f6ecdf; --mute:#b9a6c9; --dim:#8c7a9e;
+  --red:#ff4d5a; --red2:#c22a3f; --ember:#ff9a3c; --gold:#ffd166; --teal:#58e0c6; --sky:#8fb8ff; --ok:#7bd389;
+  --r:18px; --disp:'Bungee',Impact,'Arial Black',system-ui,sans-serif; --body:'Barlow',system-ui,-apple-system,'Segoe UI',sans-serif; --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 var(--body);overflow-x:hidden;
+  background-image:radial-gradient(1200px 600px at 50% -200px,#3a1636 0,transparent 70%),radial-gradient(800px 500px at 100% 30%,#201238 0,transparent 70%);}
+a{color:var(--gold)}
+a:focus-visible,button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.wrap{max-width:1160px;margin:0 auto;padding:0 20px}
+.sub{color:var(--mute)}
+.mono{font-family:var(--mono)}
+[hidden]{display:none!important}
+
+/* top bar */
+.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:18px 0 10px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);margin-right:auto}
+.brand svg{width:40px;height:40px;flex:none}
+.brand b{font:400 22px/1 var(--disp);letter-spacing:.5px}
+.brand b i{font-style:normal;color:var(--red)}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;background:#ffffff0d;border:1px solid var(--line);font-size:14px;white-space:nowrap}
+.chip .mono{font-size:13px}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--dim);flex:none}
+.dot.on{background:var(--ok);box-shadow:0 0 0 4px #7bd38933;animation:pulse 1.6s ease-in-out infinite}
+.dot.warn{background:var(--ember)}
+@keyframes pulse{50%{box-shadow:0 0 0 8px #7bd38900}}
+
+.wallet{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 0 18px;border-bottom:1px solid var(--line)}
+#wBtns{display:flex;gap:8px;flex-wrap:wrap}
+#wState{display:flex;gap:8px;flex-wrap:wrap;align-items:center;color:var(--mute);font-size:14px}
+.addr{font-family:var(--mono);font-size:13px;color:var(--gold)}
+.badge{display:inline-block;padding:3px 9px;border-radius:999px;background:#ffffff10;border:1px solid var(--line);font-size:12.5px;color:var(--mute)}
+.badge.ok{color:var(--ok);border-color:#7bd38955}
+.badge.warn{color:var(--ember);border-color:#ff9a3c55}
+.btn{appearance:none;border:1px solid var(--line);background:var(--panel2);color:var(--ink);font:600 15px/1 var(--body);padding:11px 16px;border-radius:12px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;text-decoration:none;transition:transform .15s,background .15s,border-color .15s,box-shadow .15s}
+.btn:hover:not(:disabled){background:#35204f;border-color:#5a3a7c;transform:translateY(-1px)}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn.primary{background:linear-gradient(180deg,var(--gold),#f0a83a);color:#2a1406;border-color:#ffe2a0}
+.btn.primary:hover:not(:disabled){background:linear-gradient(180deg,#ffe08c,#f5b44a)}
+.btn.charge{font:400 22px/1 var(--disp);letter-spacing:1px;padding:18px 28px;border-radius:16px;color:#fff;border:2px solid #ff8a8f;
+  background:linear-gradient(180deg,#ff5f6a,#c4213a);box-shadow:0 10px 30px -8px #ff4d5a99,inset 0 -4px 0 #0003,inset 0 2px 0 #fff4;text-shadow:0 2px 0 #0004}
+.btn.charge:hover:not(:disabled){background:linear-gradient(180deg,#ff7680,#d42b45);box-shadow:0 14px 40px -8px #ff4d5acc,inset 0 -4px 0 #0003,inset 0 2px 0 #fff4}
+.btn.charge.hot{animation:throb 1.4s ease-in-out infinite}
+@keyframes throb{50%{box-shadow:0 10px 50px -4px #ff4d5aee,inset 0 -4px 0 #0003,inset 0 2px 0 #fff4}}
+.btn.done{background:#2a3a33;border-color:#3f6b55;color:var(--ok);font:400 18px/1 var(--disp)}
+.btn img{width:18px;height:18px;border-radius:4px}
+
+.notice{margin:16px 0 0;padding:12px 16px;border-radius:12px;background:#ff9a3c14;border:1px solid #ff9a3c44;color:#ffd2a8}
+
+/* arena */
+.arena{position:relative;margin:22px 0 0;border-radius:28px;overflow:hidden;border:1px solid var(--line);
+  background:linear-gradient(180deg,#1a0c25 0,#2b1033 55%,#1a0b1f 100%);display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);min-height:560px;isolation:isolate}
+.scene{position:absolute;inset:0;z-index:-1;pointer-events:none}
+.scene svg{width:100%;height:100%;display:block}
+.embers i{position:absolute;bottom:-10px;width:4px;height:4px;border-radius:50%;background:var(--ember);box-shadow:0 0 8px var(--ember);opacity:0;animation:rise linear infinite}
+@keyframes rise{0%{transform:translate(0,0);opacity:0}10%{opacity:.9}100%{transform:translate(30px,-560px);opacity:0}}
+.stage{position:relative;display:flex;align-items:flex-end;justify-content:center;padding:30px 20px 34px;min-height:420px}
+#bossArt{position:relative;width:min(400px,92%);aspect-ratio:1;border-radius:50%;display:grid;place-items:center}
+#bossArt::before{content:"";position:absolute;inset:6%;border-radius:50%;background:radial-gradient(circle,#ff4d5a33 0,#ff4d5a00 65%);filter:blur(6px)}
+#bossArt img{position:relative;width:100%;height:100%;border-radius:50%;object-fit:cover;-webkit-mask:radial-gradient(circle,#000 62%,transparent 71%);mask:radial-gradient(circle,#000 62%,transparent 71%);animation:bob 4s ease-in-out infinite}
+#bossArt .ph{position:relative;color:var(--mute);text-align:center;padding:30px}
+#bossArt.hit img{animation:shake .55s cubic-bezier(.36,.07,.19,.97) both,flash .55s}
+#bossArt.down img{animation:none;filter:grayscale(.6) brightness(.7)}
+@keyframes bob{50%{transform:translateY(-10px)}}
+@keyframes shake{10%,90%{transform:translateX(-4px)}20%,80%{transform:translateX(8px)}30%,50%,70%{transform:translateX(-14px) rotate(-2deg)}40%,60%{transform:translateX(14px) rotate(2deg)}}
+@keyframes flash{0%,40%{filter:brightness(2.2) saturate(.4)}100%{filter:none}}
+#pops{position:absolute;inset:0;pointer-events:none}
+.pop{position:absolute;left:50%;top:38%;font:400 34px/1 var(--disp);color:var(--gold);text-shadow:0 3px 0 #7a1a1a,0 0 18px #ff4d5a;transform:translate(-50%,0);animation:pop 1.6s ease-out forwards}
+@keyframes pop{0%{transform:translate(-50%,10px) scale(.6);opacity:0}15%{transform:translate(-50%,0) scale(1.15);opacity:1}100%{transform:translate(-50%,-90px) scale(1);opacity:0}}
+.lvl{position:absolute;top:22px;left:22px;font:400 14px/1 var(--disp);letter-spacing:1px;padding:8px 12px;border-radius:10px;background:#00000055;border:1px solid #ffffff22;color:var(--gold)}
+.hamster{position:absolute;left:18px;bottom:16px;width:120px;opacity:.95}
+.hamster .wheelspin{transform-origin:60px 60px}
+.arena.running .hamster .wheelspin{animation:spin 1.2s linear infinite}
+.arena.running .hamster .legs{animation:legs .25s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes legs{50%{transform:translateY(-2px)}}
+
+.info{padding:34px 34px 30px 10px;display:flex;flex-direction:column;gap:16px;justify-content:center}
+.eyebrow{font:600 13px/1 var(--mono);letter-spacing:2px;text-transform:uppercase;color:var(--ember)}
+h1#bossName{margin:0;font:400 clamp(28px,4.2vw,46px)/1.05 var(--disp);letter-spacing:.3px;text-shadow:0 4px 0 #00000055}
+.hp{display:grid;gap:8px}
+.hpbar{position:relative;height:30px;border-radius:12px;background:#0b0610;border:2px solid #5a2a3a;overflow:hidden;box-shadow:inset 0 3px 8px #000a}
+.hpbar>span{position:absolute;top:0;bottom:0;left:0;transition:width 1.2s cubic-bezier(.2,.8,.2,1)}
+#hpGhost{background:repeating-linear-gradient(-45deg,#ffd16699 0 8px,#ff9a3c88 8px 16px)}
+#hpFill{background:linear-gradient(180deg,#ff6f78,#d3233c 60%,#a1162d);box-shadow:inset 0 2px 0 #ffffff40}
+#hpFill::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 calc(10% - 2px),#0005 calc(10% - 2px) 10%)}
+.hprow{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:14px;color:var(--mute)}
+.hprow b{font:600 17px/1.2 var(--mono);color:var(--ink)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.stat{padding:12px;border-radius:14px;background:#ffffff08;border:1px solid var(--line)}
+.stat b{display:block;font:600 20px/1.1 var(--mono)}
+.stat span{font-size:12.5px;color:var(--mute)}
+#actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+#chargeHint{margin:0;font-size:15px;color:var(--mute)}
+#chargeHint b{color:var(--ink)}
+#myQueue{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+
+/* sections */
+section.panel{margin:26px 0 0;padding:26px;border-radius:var(--r);background:linear-gradient(180deg,var(--panel),#190e27);border:1px solid var(--line)}
+.panel h2{margin:0;font:400 22px/1.2 var(--disp);letter-spacing:.3px}
+.phead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.step{padding:18px;border-radius:14px;background:#ffffff06;border:1px solid var(--line)}
+.step h3{margin:0 0 6px;font:400 16px/1.2 var(--disp);color:var(--gold)}
+.step p{margin:0;color:var(--mute);font-size:15px}
+.step .n{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:8px;background:var(--red2);color:#fff;font:400 14px/1 var(--disp);margin-bottom:10px}
+.rules{margin:14px 0 0;display:flex;flex-wrap:wrap;gap:8px}
+.tablebox{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px;border:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;font-size:15px;min-width:620px}
+th{font:600 12px/1 var(--mono);letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);text-align:left;padding:12px;border-bottom:1px solid var(--line);background:#ffffff05}
+td{padding:11px 12px;border-bottom:1px solid #ffffff0d;vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-family:var(--mono)}
+tr.me td{background:#ffd16614}
+.rank{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;font:400 13px/1 var(--disp);background:#ffffff12}
+.rank.r1{background:var(--gold);color:#3a2306}.rank.r2{background:#d7dde8;color:#2a2f38}.rank.r3{background:#d08a55;color:#2f1608}
+.tier{font:600 12px/1 var(--mono);padding:4px 8px;border-radius:999px;border:1px solid}
+.tier.t3{color:var(--gold);border-color:#ffd16677}.tier.t2{color:#d7dde8;border-color:#d7dde877}.tier.t1{color:#e5a172;border-color:#d08a5577}
+.perk{font-size:12px;margin-left:6px;color:var(--teal)}
+#feed{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+#feed li{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:11px 14px;border-radius:12px;background:#ffffff06;border:1px solid #ffffff0d;font-size:15px}
+#feed li.kill{background:#ffd16612;border-color:#ffd16644}
+#feed li.flee{background:#8fb8ff10;border-color:#8fb8ff33}
+#feed li .t{flex:none;font:12px var(--mono);color:var(--dim);text-decoration:none}
+#feed li .ic{flex:none;width:26px;text-align:center}
+#feed li span.txt{flex:1;min-width:0}
+.hall{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.card{padding:14px;border-radius:16px;background:#ffffff06;border:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.card img{width:100%;aspect-ratio:1;border-radius:12px;background:#160d1f}
+.card h3{margin:0;font:600 16px/1.25 var(--body)}
+.card .meta{font:12.5px/1.4 var(--mono);color:var(--mute)}
+.card .btn{justify-content:center}
+.fate{font:600 11px/1 var(--mono);letter-spacing:1.5px;text-transform:uppercase;padding:4px 8px;border-radius:6px;align-self:flex-start}
+.fate.f1{background:#ffd16622;color:var(--gold)}.fate.f2{background:#8fb8ff22;color:var(--sky)}.fate.f0{background:#ff4d5a22;color:var(--red)}
+.empty{color:var(--mute);padding:6px 0}
+footer{margin:34px 0 0;padding:26px 0 40px;border-top:1px solid var(--line);color:var(--dim);font-size:14px;display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:space-between}
+footer a{color:var(--mute)}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:20;max-width:min(92vw,520px);padding:13px 18px;border-radius:14px;background:#2a1840f2;border:1px solid #6a4590;box-shadow:0 18px 40px #0008;font-weight:600;backdrop-filter:blur(6px)}
+
+@media (max-width:900px){
+  .arena{grid-template-columns:1fr;min-height:0}
+  .stage{min-height:0;padding:56px 16px 10px}
+  #bossArt{width:min(320px,80%)}
+  .info{padding:8px 20px 24px}
+  .hamster{width:88px;left:10px;bottom:auto;top:12px;right:auto}
+  .lvl{left:auto;right:16px;top:16px}
+  .steps{grid-template-columns:1fr}
+}
+@media (max-width:520px){
+  .wrap{padding:0 14px}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .btn.charge{width:100%;justify-content:center;font-size:20px}
+  section.panel{padding:18px}
+  .chip{font-size:13px}
+  .brand b{font-size:19px}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="./" aria-label="Wheel Raid home">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="28" fill="#2a1840" stroke="#ffd166" stroke-width="4"/><path d="M32 6v52M6 32h52M13.6 13.6l36.8 36.8M50.4 13.6L13.6 50.4" stroke="#ffd166" stroke-width="2.5" opacity=".55"/><path d="M20 44l20-20m-4-4l8 8" stroke="#ff4d5a" stroke-width="6" stroke-linecap="round"/><circle cx="32" cy="32" r="5" fill="#ffd166"/></svg>
+      <b>WHEEL <i>RAID</i></b>
+    </a>
+    <span class="chip"><span class="dot" id="runDot"></span><span id="runTxt">Checking the wheel…</span><span class="mono sub" id="rRpm"></span></span>
+    <span class="chip">Round <b class="mono" id="rNow">–</b><span class="sub">ends in</span><b class="mono" id="rLeft">–</b></span>
+  </header>
+  <div class="wallet"><div id="wBtns"></div><div id="wState"></div></div>
+  <p class="notice" id="notDeployed" hidden><span id="notDeployedTxt"></span></p>
+
+  <main>
+  <section class="arena" id="arena" aria-label="The boss">
+    <div class="scene" aria-hidden="true">
+      <svg viewBox="0 0 1160 560" preserveAspectRatio="xMidYMax slice">
+        <defs>
+          <radialGradient id="moon" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffb3a0"/><stop offset=".55" stop-color="#ff5a5f"/><stop offset="1" stop-color="#ff5a5f" stop-opacity="0"/></radialGradient>
+          <linearGradient id="fog" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b1033" stop-opacity="0"/><stop offset="1" stop-color="#12091a"/></linearGradient>
+        </defs>
+        <circle cx="480" cy="84" r="130" fill="url(#moon)" opacity=".3"/>
+        <circle cx="480" cy="84" r="40" fill="#ff8f86" opacity=".6"/>
+        <circle cx="468" cy="74" r="7" fill="#e0706e" opacity=".5"/><circle cx="492" cy="96" r="5" fill="#e0706e" opacity=".5"/>
+        <g fill="#fff" opacity=".6"><circle cx="80" cy="60" r="1.5"/><circle cx="520" cy="40" r="1.2"/><circle cx="700" cy="90" r="1.6"/><circle cx="880" cy="50" r="1.2"/><circle cx="1040" cy="110" r="1.5"/><circle cx="160" cy="180" r="1"/><circle cx="960" cy="200" r="1"/><circle cx="620" cy="160" r="1"/></g>
+        <path d="M0 420 L60 380 L60 330 L80 330 L80 300 L100 300 L100 330 L120 330 L120 370 L190 350 L260 380 L340 360 L420 390 L520 370 L640 400 L760 360 L800 360 L800 300 L815 280 L830 300 L830 360 L900 350 L980 380 L1060 350 L1160 390 L1160 560 L0 560Z" fill="#200d28"/>
+        <path d="M0 470 Q200 430 400 460 T800 450 T1160 460 L1160 560 L0 560Z" fill="#170a1e"/>
+        <rect width="1160" height="560" fill="url(#fog)"/>
+        <g opacity=".85"><path d="M214 470 l6-40 6 40z" fill="#3a1a20"/><circle cx="220" cy="426" r="9" fill="#ff9a3c" opacity=".9"/><circle cx="220" cy="426" r="22" fill="#ff9a3c" opacity=".15"/></g>
+        <g opacity=".85"><path d="M1070 470 l6-40 6 40z" fill="#3a1a20"/><circle cx="1076" cy="426" r="9" fill="#ff9a3c" opacity=".9"/><circle cx="1076" cy="426" r="22" fill="#ff9a3c" opacity=".15"/></g>
+      </svg>
+      <div class="embers"><i style="left:8%;animation-duration:9s;animation-delay:0s"></i><i style="left:22%;animation-duration:12s;animation-delay:3s"></i><i style="left:37%;animation-duration:10s;animation-delay:6s"></i><i style="left:55%;animation-duration:13s;animation-delay:1s"></i><i style="left:70%;animation-duration:11s;animation-delay:4s"></i><i style="left:86%;animation-duration:9.5s;animation-delay:7s"></i></div>
+    </div>
+    <div class="stage">
+      <span class="lvl" id="bossLvl">LV –</span>
+      <svg class="hamster" viewBox="0 0 120 120" aria-hidden="true">
+        <g class="wheelspin"><circle cx="60" cy="60" r="52" fill="none" stroke="#c99a5a" stroke-width="6"/><path d="M60 8v104M8 60h104M23 23l74 74M97 23L23 97" stroke="#c99a5a" stroke-width="2.5" opacity=".7"/></g>
+        <path d="M30 116l30-56 30 56" fill="none" stroke="#8a6238" stroke-width="5" stroke-linecap="round"/>
+        <g class="legs"><ellipse cx="60" cy="94" rx="20" ry="13" fill="#f2b35e" stroke="#3a2a1a" stroke-width="2.5"/><ellipse cx="74" cy="88" rx="9" ry="8" fill="#f2b35e" stroke="#3a2a1a" stroke-width="2.5"/><circle cx="77" cy="86" r="1.8" fill="#1a1208"/><ellipse cx="68" cy="80" rx="4" ry="5" fill="#f7a8b8" stroke="#3a2a1a" stroke-width="1.5"/><path d="M58 92 l-8 -10" stroke="#ff4d5a" stroke-width="3" stroke-linecap="round"/></g>
+      </svg>
+      <div id="bossArt"><div class="ph">Summoning the boss…</div></div>
+      <div id="pops" aria-hidden="true"></div>
+    </div>
+    <div class="info">
+      <div class="eyebrow" id="bossEyebrow">The boss</div>
+      <h1 id="bossName">Wheel Raid</h1>
+      <div class="hp">
+        <div class="hpbar" id="hpBar" role="progressbar" aria-label="Boss HP" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><span id="hpGhost" style="width:0"></span><span id="hpFill" style="width:100%"></span></div>
+        <div class="hprow"><span><b id="hpTxt">–</b> HP</span><span id="hpIncoming"></span><span id="fleeTxt"></span></div>
+      </div>
+      <div class="stats">
+        <div class="stat"><b id="stNow">–</b><span>raiders this round</span></div>
+        <div class="stat"><b id="stRally">–</b><span>rally bonus</span></div>
+        <div class="stat"><b id="stPower">–</b><span>your power</span></div>
+        <div class="stat"><b id="stDmg">–</b><span>your damage</span></div>
+      </div>
+      <div id="actions"></div>
+      <p id="chargeHint"></p>
+      <ul id="myQueue" aria-label="Your charges waiting"></ul>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="howTitle">
+    <div class="phead"><h2 id="howTitle">How the raid works</h2><span class="sub">Every number comes from SqueekCore on Sepolia.</span></div>
+    <div class="steps">
+      <div class="step"><span class="n">1</span><h3>Charge</h3><p>While Squeektoshi runs, charge the 10-minute round in progress. One charge per wallet per round, free on Sepolia.</p></div>
+      <div class="step"><span class="n">2</span><h3>Settle</h3><p>When SqueekCore settles the round, everyone who charged it hits the boss for the round's real wheel work. A still wheel is a miss.</p></div>
+      <div class="step"><span class="n">3</span><h3>Topple</h3><p>Empty its HP and a stronger boss steps in. Everyone who hurt the fallen boss claims a soulbound trophy. Leave it a week and it flees.</p></div>
+    </div>
+    <div class="rules">
+      <span class="badge">Rally: +10% per extra raider in a round, up to +50%</span>
+      <span class="badge">Squeek holders +25% power</span>
+      <span class="badge">Wheeling owners +25% power</span>
+      <span class="badge">Trophies: Gold 25%+ of max HP, Silver 8%+, Bronze</span>
+      <span class="badge">Killing blow for every raider in the final round</span>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="boardTitle">
+    <div class="phead"><h2 id="boardTitle">Raiders on this boss</h2><span class="sub mono" id="boardCount"></span></div>
+    <div class="tablebox"><table>
+      <thead><tr><th>#</th><th>Raider</th><th class="num">Power</th><th class="num">Damage</th><th class="num">Share</th><th>Trophy</th><th class="num">Charges</th></tr></thead>
+      <tbody id="board"></tbody>
+    </table></div>
+  </section>
+
+  <section class="panel" aria-labelledby="logTitle">
+    <div class="phead"><h2 id="logTitle">Raid log</h2><span class="sub">Read from the contract's events</span></div>
+    <ul id="feed"></ul>
+  </section>
+
+  <section class="panel" aria-labelledby="hallTitle">
+    <div class="phead"><h2 id="hallTitle">Hall of bosses</h2><span class="sub" id="hallSub"></span></div>
+    <div class="hall" id="hall"></div>
+  </section>
+  </main>
+
+  <footer>
+    <span id="links">Contract: –</span>
+    <span>Testnet only. Nothing here has value. Built on <a href="https://squeekchain.com" target="_blank" rel="noopener">Squeekchain</a>.</span>
+  </footer>
+</div>
+<div id="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+(() => {
+'use strict';
+/* ---------- configuration ---------- */
+const RAID = '0x77240d974bb7a4ccb85021ff2c40ca0324f57896';   // the deployed WheelRaid contract on Sepolia
+const DEPLOY_BLOCK = 12074799;    // its deployment block (events are read from here)
+const CORE = '0xfd6c166d4b8e2962e65746a13e5a0797cd4de0c4';
+const SEPOLIA = '0xaa36a7';
+const RPCS = ['https://ethereum-sepolia-rpc.publicnode.com', 'https://1rpc.io/sepolia'];
+const API = 'https://api.squeekchain.com';
+const SEL = { charge: '0x55161913', advance: '0x71d6ddd6', claim: '0x379607f5', currentRound: '0x8a19c8bc', settled: '0x83d0e1d7', genesis: '0xa7f0b3de', roundDuration: '0xf7cb789a',
+  currentBoss: '0x856f8c35', bossCount: '0x24e2c53a', bosses: '0x36b36c9f', bossSvg: '0x140f72fa', rounds: '0xbc3ac875', roundWork: '0xbb857152', queued: '0x9f0c3101',
+  raider: '0x862950b7', raiders: '0x1b53eea8', raiderCount: '0x9f237e6c', powerOf: '0x1ac84690', trophyOf: '0xfaa437e9', trophy: '0xa4c959fa', tokenURI: '0xc87b56dd' };
+const ERRORS = { '0xb91e8078': 'You already charged this round. Come back next round.', '0x91b2ed49': 'That round is already settled; charge the round in progress.',
+  '0x1598acd8': '24 charges are already waiting for settlement. They count once SqueekCore catches up.', '0xbca6ed54': 'No such boss.', '0xb86a85f8': 'That boss is still standing.',
+  '0xb2ed9f85': "You didn't hurt that boss.", '0x646cf558': 'You already claimed that trophy.', '0xdb35acde': 'No such trophy.', '0xa4420a95': 'Trophies cannot be transferred.',
+  '0x971df169': 'The SqueekCore contract looks wrong.', '0xf6f26ecb': 'SqueekCore returned an unexpected round page; try again later.', '0xfa1661dc': 'The wheel has not started yet.' };
+const EV = { struck: '0x605b69eb7de06008584d47d253ba981620c2a38ddfe1c5bff761ff2c3819160a', defeated: '0x0955a19b1d46f1f1b67599588cdf1cc845e911f772508b2e21c84f7a063555ae',
+  fled: '0xea4753955b887adfef21abe3eb2a0f68459b2a309602bf4a1bd095cd91c98891', spawned: '0xf1eab0a49650c2376f4137714aaf143a79f9b31975a1b31e1781fbe20b14d07f',
+  charged: '0x17de15d12feee49d9ceddbb3df20a6b02cc0ae8b514b99b989075d852f7cd6e7', claimed: '0x4394bb39a244c32e1556c215bf3082cd563753433552b7044cfef201f3881959' };
+const TIERS = ['', 'Bronze', 'Silver', 'Gold'];
+const $ = id => document.getElementById(id);
+const isAddr = a => typeof a === 'string' && /^0x[0-9a-fA-F]{40}$/.test(a);
+const live = () => isAddr(RAID) && !/^0x0{40}$/i.test(RAID);
+const short = a => a.slice(0, 6) + '…' + a.slice(-4);
+const scan = (k, v) => `https://sepolia.etherscan.io/${k}/${v}`;
+const fmt = n => Math.round(Number(n)).toLocaleString('en-US');
+const setText = (id, t) => { const e = $(id); if (e && e.textContent !== t) e.textContent = t; };
+const mmss = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+const span = s => { s = Math.max(0, Math.floor(s)); const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60); return d ? `${d}d ${h}h` : h ? `${h}h ${m}m` : `${m}m`; };
+let toastT; const toast = m => { const t = $('toast'); t.textContent = m; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 3600); };
+
+/* ---------- JSON-RPC and ABI ---------- */
+let rpcId = 1;
+async function rpc(method, params){
+  let last = null;
+  for (const u of RPCS) {
+    const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 12000);
+    try { const r = await fetch(u, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: rpcId++, method, params }), signal: ctl.signal });
+      const j = await r.json(); if (j && 'result' in j) return j.result;
+      if (j && j.error && j.error.data) { const e = new Error(j.error.message || 'reverted'); e.data = typeof j.error.data === 'string' ? j.error.data : j.error.data.data; e.revert = true; throw e; }
+      last = new Error((j && j.error && j.error.message) || 'rpc'); }
+    catch (e) { if (e.revert) throw e; last = e; } finally { clearTimeout(to); }
+  }
+  throw last || new Error('rpc');
+}
+const pad = v => BigInt(v).toString(16).padStart(64, '0');
+const padAddr = a => a.slice(2).toLowerCase().padStart(64, '0');
+const words = hex => { const h = hex.slice(2); const out = []; for (let i = 0; i < h.length; i += 64) out.push(h.slice(i, i + 64)); return out; };
+const call = (data, to = RAID) => rpc('eth_call', [{ to, data }, 'latest']);
+/* minimal ABI decoder: 'n' number, 'u' bigint, 'a' address, 'b' bool, 's' string, ['n'] number[], {t:[...]} tuple, {arr:T} T[] */
+const isDyn = t => t === 's' || Array.isArray(t) || (typeof t === 'object' && (t.arr !== undefined || t.t.some(isDyn)));
+function decStatic(ws, i, t){ const w = ws[i] || '0'; if (t === 'a') return '0x' + w.slice(24); const v = BigInt('0x' + w); return t === 'b' ? v === 1n : t === 'n' ? Number(v) : v; }
+function decAt(ws, pos, t){
+  if (t === 's') { const len = Number(BigInt('0x' + ws[pos])); const hex = ws.slice(pos + 1, pos + 1 + Math.ceil(len / 32)).join('').slice(0, len * 2); const b = new Uint8Array(len); for (let i = 0; i < len; i++) b[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16); return new TextDecoder().decode(b); }
+  if (Array.isArray(t)) { const len = Number(BigInt('0x' + ws[pos])); const out = []; for (let i = 0; i < len; i++) out.push(decStatic(ws, pos + 1 + i, t[0])); return out; }
+  if (t.arr !== undefined) { const len = Number(BigInt('0x' + ws[pos])); const out = []; for (let i = 0; i < len; i++) out.push(decAt(ws, pos + 1 + Number(BigInt('0x' + ws[pos + 1 + i])) / 32, t.arr)); return out; }
+  return decTuple(ws, pos, t.t);
+}
+function decTuple(ws, base, types){ return types.map((t, i) => isDyn(t) ? decAt(ws, base + Number(BigInt('0x' + ws[base + i])) / 32, t) : decStatic(ws, base + i, t)); }
+const decode = (hex, types) => decTuple(words(hex), 0, types);
+const BOSS = { t: ['n', 's', 'u', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n'] };
+const RAIDER = { t: ['a', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', ['n']] };
+const asBoss = v => ({ id: v[0], name: v[1], seed: v[2], level: v[3], maxHp: v[4], damage: v[5], hpLeft: v[6], spawn: v[7], end: v[8], flee: v[9], strikes: v[10], fate: v[11] });
+const asRaider = v => ({ addr: v[0], power: v[1], lastCharge: v[2], charges: v[3], hits: v[4], kills: v[5], damage: v[6], uncredited: v[7], onBoss: v[8], pending: v[9] });
+const rally = n => n <= 1 ? 100 : 100 + Math.min(n - 1, 5) * 10;
+const hit = (work, power, n) => Math.floor(work * power * rally(n) / 10000);
+const tierOf = (d, hp) => { const s = d * 10000 / hp; return s >= 2500 ? 3 : s >= 800 ? 2 : 1; };
+const errText = e => { const d = e && (e.data || (e.error && e.error.data)); const sel = typeof d === 'string' ? d.slice(0, 10) : ''; return ERRORS[sel] || (e && e.code === 4001 ? 'Cancelled in the wallet.' : (e && e.message ? e.message.slice(0, 140) : 'Something went wrong.')); };
+const svgSrc = svg => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+
+/* ---------- state ---------- */
+const S = { deployed: false, checked: false, reach: true, status: null, statusErr: 0, lastStatusAt: 0, round: 0, settled: 0, genesis: 0, dur: 600,
+  boss: null, bossCount: 0, past: [], art: new Map(), nowRound: null, incoming: 0, incomingRounds: 0, applyable: 0, board: [], me: null, myBoss: new Map(),
+  feed: [], feedErr: false, busy: false, lastDamage: null, lastBossId: null };
+
+async function loadStatus(){
+  const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 8000);
+  try { const r = await fetch(API + '/v1/status', { cache: 'no-store', signal: ctl.signal }); if (!r.ok) throw new Error('status'); S.status = await r.json(); S.lastStatusAt = Date.now(); }
+  finally { clearTimeout(to); }
+}
+async function checkDeployed(){
+  if (!live()) { S.reach = true; return false; }
+  try { const code = await rpc('eth_getCode', [RAID, 'latest']); S.reach = true; return typeof code === 'string' && code.length > 4; }
+  catch { S.reach = false; return false; }
+}
+async function art(id, fate){
+  const k = id + ':' + fate; if (S.art.has(k)) return S.art.get(k);
+  try { const [svg] = decode(await call(SEL.bossSvg + pad(id)), ['s']); const src = svgSrc(svg); S.art.set(k, src); return src; } catch { return null; }
+}
+async function loadChain(){
+  if (!S.deployed) { if (!live()) return; S.deployed = await checkDeployed(); if (!S.deployed) return; S.late = true; }
+  const [cr, st, cb, bc] = await Promise.all([call(SEL.currentRound), call(SEL.settled), call(SEL.currentBoss), call(SEL.bossCount)]);
+  S.round = Number(BigInt(cr)); S.settled = Number(BigInt(st)); S.bossCount = Number(BigInt(bc));
+  const boss = asBoss(decode(cb, [BOSS])[0]);
+  if (!S.genesis) { S.genesis = Number(BigInt(await call(SEL.genesis))); S.dur = Number(BigInt(await call(SEL.roundDuration))) || 600; }
+  const rn = decode(await call(SEL.rounds + pad(S.round)), ['n', 'n', 'n', 'n', 'b']); S.nowRound = { raiders: rn[0], power: rn[1] };
+  // charged rounds already settled but not applied to the boss yet: show them as incoming damage
+  const [ql, qr, qp] = decode(await call(SEL.queued + pad(48)), [['n'], ['n'], ['n']]);
+  let inc = 0, n = 0;
+  for (let i = 0; i < ql.length && ql[i] <= S.settled; i++) { n++; try { const w = Number(BigInt(await call(SEL.roundWork + pad(ql[i])))); inc += hit(w, qp[i], qr[i]); } catch {} }
+  S.incoming = inc; S.applyable = n; S.queuedRounds = ql;
+  await art(boss.id, boss.fate);
+  S.boss = boss;
+  if (Wal.addr) { S.me = asRaider(decode(await call(SEL.raider + padAddr(Wal.addr) + pad(boss.id)), [RAIDER])[0]); S.me.powerNow = S.me.power; }
+  else S.me = null;
+  if (S.late) { S.late = false; try { await loadBoard(); await loadHall(); await loadFeed(); } catch {} }
+}
+async function loadBoard(){
+  if (!S.deployed || !S.boss) { S.board = []; return; }
+  const n = Number(BigInt(await call(SEL.raiderCount))); const all = [];
+  for (let start = 0; start < n; start += 50) all.push(...decode(await call(SEL.raiders + pad(S.boss.id) + pad(start) + pad(50)), [{ arr: RAIDER }])[0].map(asRaider));
+  S.board = all.filter(r => r.onBoss > 0 || r.pending.some(x => x > S.settled)).sort((a, b) => b.onBoss - a.onBoss || b.charges - a.charges);
+}
+async function loadHall(){
+  if (!S.deployed || !S.bossCount) { S.past = []; return; }
+  const list = decode(await call(SEL.bosses + pad(S.bossCount - 1) + pad(24)), [{ arr: BOSS }])[0].map(asBoss).filter(b => b.fate !== 0);
+  for (const b of list) { b.src = await art(b.id, b.fate);
+    if (Wal.addr) { try { const me = asRaider(decode(await call(SEL.raider + padAddr(Wal.addr) + pad(b.id)), [RAIDER])[0]); b.mine = me.onBoss;
+        b.trophy = Number(BigInt(await call(SEL.trophyOf + pad(b.id) + padAddr(Wal.addr))));
+        if (b.trophy && !b.trophyImg) { try { const [uri] = decode(await call(SEL.tokenURI + pad(b.trophy)), ['s']); const j = JSON.parse(atob(uri.split(',')[1])); b.trophyImg = j.image; b.trophyName = j.name; } catch {} } } catch {} } }
+  S.past = list;
+}
+async function loadFeed(){
+  if (!S.deployed) return;
+  const head = parseInt(await rpc('eth_blockNumber', []), 16);
+  const logs = []; let to = head; const floor = Math.max(DEPLOY_BLOCK, head - 60000);
+  try {
+    while (to >= floor && logs.length < 40) { const from = Math.max(floor, to - 9999);
+      const part = await rpc('eth_getLogs', [{ address: RAID, topics: [[EV.struck, EV.defeated, EV.fled, EV.spawned, EV.claimed]], fromBlock: '0x' + from.toString(16), toBlock: '0x' + to.toString(16) }]);
+      if (Array.isArray(part)) logs.unshift(...part); to = from - 1; }
+    S.feedErr = false;
+  } catch { S.feedErr = true; return; }
+  const out = [];
+  for (const l of logs) { const d = words(l.data || '0x'); const t = l.topics; const N = i => Number(BigInt('0x' + (d[i] || '0')));
+    if (t[0] === EV.struck) out.push({ k: 'struck', round: Number(BigInt(t[1])), boss: Number(BigInt(t[2])), work: N(0), raiders: N(1), dmg: N(2), left: N(3), tx: l.transactionHash, b: l.blockNumber, li: l.logIndex });
+    else if (t[0] === EV.defeated) out.push({ k: 'defeated', boss: Number(BigInt(t[1])), round: N(0), tx: l.transactionHash, b: l.blockNumber, li: l.logIndex });
+    else if (t[0] === EV.fled) out.push({ k: 'fled', boss: Number(BigInt(t[1])), round: N(0), tx: l.transactionHash, b: l.blockNumber, li: l.logIndex });
+    else if (t[0] === EV.spawned) out.push({ k: 'spawned', boss: Number(BigInt(t[1])), level: N(0), hp: N(1), round: N(2), tx: l.transactionHash, b: l.blockNumber, li: l.logIndex });
+    else if (t[0] === EV.claimed) out.push({ k: 'claimed', id: Number(BigInt(t[1])), who: '0x' + t[2].slice(26), boss: Number(BigInt(t[3])), tier: N(0), kb: N(1) === 1, tx: l.transactionHash, b: l.blockNumber, li: l.logIndex }); }
+  S.feed = out.slice(-30).reverse();
+}
+
+/* ---------- wallet (any EIP-6963 or injected wallet) ---------- */
+const WKEY = 'wheelraid.wallet.v1';
+const Wal = { list: [], prov: null, info: null, addr: null, chain: null, choosing: false, noWallet: false, busy: false, note: '' };
+const bound = new WeakSet();
+window.addEventListener('eip6963:announceProvider', e => { const d = e.detail;
+  if (d && d.provider && typeof d.provider.request === 'function' && d.info && typeof d.info.name === 'string' && !Wal.list.some(p => p.info.uuid === d.info.uuid)) { Wal.list.push(d); renderWallet(); setTimeout(quietReconnect, 0); } });
+try { window.dispatchEvent(new Event('eip6963:requestProvider')); } catch {}
+const KNOWN = [['isRabby', 'Rabby', 'io.rabby'], ['isOkxWallet', 'OKX Wallet', 'com.okex.wallet'], ['isOKExWallet', 'OKX Wallet', 'com.okex.wallet'], ['isCoinbaseWallet', 'Coinbase Wallet', 'com.coinbase.wallet'],
+  ['isTrust', 'Trust Wallet', 'com.trustwallet.app'], ['isBitKeep', 'Bitget Wallet', 'com.bitget.web3'], ['isPhantom', 'Phantom', 'app.phantom'], ['isBraveWallet', 'Brave Wallet', 'com.brave.wallet'], ['isMetaMask', 'MetaMask', 'io.metamask']];
+function legacyInfo(pr, name, rdns){ if (!name) { const k = KNOWN.find(([f]) => { try { return pr[f] === true; } catch { return false; } }); name = k ? k[1] : 'Browser wallet'; rdns = k ? k[2] : 'injected'; }
+  return { info: { name, rdns, uuid: 'legacy:' + rdns, icon: '' }, provider: pr }; }
+function wallets(){ const l = Wal.list.slice(); const ok = pr => { try { return !!pr && typeof pr.request === 'function'; } catch { return false; } };
+  const add = w => { if (!ok(w.provider) || l.some(x => x.provider === w.provider || x.info.rdns === w.info.rdns)) return; l.push(w); };
+  try { add(legacyInfo(window.okxwallet, 'OKX Wallet', 'com.okex.wallet')); add(legacyInfo(window.bitkeep && window.bitkeep.ethereum, 'Bitget Wallet', 'com.bitget.web3'));
+    add(legacyInfo(window.trustwallet, 'Trust Wallet', 'com.trustwallet.app')); add(legacyInfo(window.coinbaseWalletExtension, 'Coinbase Wallet', 'com.coinbase.wallet'));
+    const eth = window.ethereum; if (eth && Array.isArray(eth.providers)) for (const pr of eth.providers) add(legacyInfo(pr)); if (eth) add(legacyInfo(eth)); } catch {}
+  return l; }
+function appLinks(){ const url = location.href.split('#')[0]; const e = encodeURIComponent;
+  return [['MetaMask', 'https://metamask.app.link/dapp/' + url.replace(/^https?:\/\//, '')], ['OKX Wallet', 'https://web3.okx.com/download?deeplink=' + e('okx://wallet/dapp/url?dappUrl=' + e(url))],
+    ['Trust Wallet', 'https://link.trustwallet.com/open_url?coin_id=60&url=' + e(url)], ['Coinbase Wallet', 'https://go.cb-w.com/dapp?cb_url=' + e(url)]]; }
+const wget = () => { try { const v = JSON.parse(localStorage.getItem(WKEY) || 'null'); return v && typeof v.rdns === 'string' ? v : null; } catch { return null; } };
+const wset = v => { try { v ? localStorage.setItem(WKEY, JSON.stringify(v)) : localStorage.removeItem(WKEY); } catch {} };
+async function useWallet(w, ask){
+  const pr = w.provider;
+  if (!bound.has(pr) && typeof pr.on === 'function') { bound.add(pr);
+    pr.on('accountsChanged', a => { if (Wal.prov !== pr) return; Wal.addr = Array.isArray(a) && isAddr(a[0]) ? a[0] : null; if (!Wal.addr) wset(null); refresh(true); });
+    pr.on('chainChanged', c => { if (Wal.prov !== pr) return; Wal.chain = typeof c === 'string' ? c.toLowerCase() : null; render(); }); }
+  const accts = await pr.request({ method: ask ? 'eth_requestAccounts' : 'eth_accounts' });
+  if (!Array.isArray(accts) || !isAddr(accts[0])) { if (ask) throw new Error('no account'); return false; }
+  Wal.prov = pr; Wal.info = w.info; Wal.addr = accts[0]; Wal.choosing = false; Wal.noWallet = false;
+  try { const c = await pr.request({ method: 'eth_chainId' }); Wal.chain = typeof c === 'string' ? c.toLowerCase() : null; } catch { Wal.chain = null; }
+  wset({ rdns: w.info.rdns || 'injected' }); return true;
+}
+async function connectWallet(w){
+  if (Wal.busy) return; Wal.busy = true; Wal.note = ''; renderWallet();
+  try { await useWallet(w, true); if (Wal.chain !== SEPOLIA) { try { await switchSepolia(); } catch {} } toast(Wal.chain === SEPOLIA ? 'Wallet connected on Sepolia' : 'Connected; switch the wallet to Sepolia to raid'); }
+  catch (e) { Wal.note = e && e.code === 4001 ? 'Connection cancelled in the wallet.' : 'The wallet did not connect.'; }
+  finally { Wal.busy = false; refresh(true); }
+}
+async function switchSepolia(){
+  if (!Wal.prov) return;
+  try { await Wal.prov.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: SEPOLIA }] }); }
+  catch (e) { if (e && (e.code === 4902 || (e.data && e.data.originalError && e.data.originalError.code === 4902)))
+      await Wal.prov.request({ method: 'wallet_addEthereumChain', params: [{ chainId: SEPOLIA, chainName: 'Sepolia', nativeCurrency: { name: 'Sepolia Ether', symbol: 'ETH', decimals: 18 }, rpcUrls: [RPCS[0]], blockExplorerUrls: ['https://sepolia.etherscan.io'] }] });
+    else if (!(e && e.code === 4001)) throw e; }
+  try { const c = await Wal.prov.request({ method: 'eth_chainId' }); Wal.chain = typeof c === 'string' ? c.toLowerCase() : Wal.chain; } catch {}
+}
+function disconnectWallet(){ const pr = Wal.prov; Wal.prov = null; Wal.info = null; Wal.addr = null; Wal.chain = null; wset(null);
+  try { pr && pr.request({ method: 'wallet_revokePermissions', params: [{ eth_accounts: {} }] }).catch(() => {}); } catch {} refresh(true); }
+const tried = new Set();
+async function quietReconnect(){ const saved = wget(); if (!saved || Wal.addr || Wal.busy) return;
+  const w = wallets().find(x => (x.info.rdns || 'injected') === saved.rdns) || (saved.rdns === 'injected' ? wallets()[0] : null);
+  if (!w || tried.has(w.info.uuid)) return; tried.add(w.info.uuid);
+  try { if (await useWallet(w, false)) refresh(true); } catch {} }
+setTimeout(() => { quietReconnect(); renderWallet(); }, 600);
+
+function renderWallet(){
+  const btns = $('wBtns'), st = $('wState'); const list = wallets();
+  const sig = [Wal.addr, Wal.chain, Wal.choosing, Wal.noWallet, Wal.busy, Wal.note, Wal.info && Wal.info.name, list.map(w => w.info.uuid).join(',')].join('|');
+  if (btns.dataset.sig === sig) return; btns.dataset.sig = sig; btns.innerHTML = ''; st.innerHTML = '';
+  const btn = (t, f, cls) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn' + (cls ? ' ' + cls : ''); b.textContent = t; b.addEventListener('click', f); btns.appendChild(b); return b; };
+  const sp = (t, cls) => { const e = document.createElement('span'); if (cls) e.className = cls; e.textContent = t; st.appendChild(e); return e; };
+  if (!Wal.addr) {
+    if (Wal.choosing && list.length > 1) { for (const w of list) { const b = btn(w.info.name, () => connectWallet(w));
+        if (typeof w.info.icon === 'string' && /^data:image\/(svg\+xml|png|webp|jpeg|gif)[;,]/.test(w.info.icon)) { const im = document.createElement('img'); im.src = w.info.icon; im.alt = ''; im.width = 18; im.height = 18; b.prepend(im); } }
+      btn('Cancel', () => { Wal.choosing = false; renderWallet(); }); sp(`${list.length} wallets found. Choose one; it will ask to connect on Sepolia.`); return; }
+    if (Wal.noWallet) { for (const [n, href] of appLinks()) { const a = document.createElement('a'); a.className = 'btn'; a.href = href; a.rel = 'noopener'; a.textContent = 'Open in ' + n; btns.appendChild(a); }
+      btn('Back', () => { Wal.noWallet = false; renderWallet(); });
+      sp('No wallet in this browser. On a phone, open Wheel Raid inside your wallet app; on a computer, install a wallet extension. You can still watch the raid.'); return; }
+    const b = btn(Wal.busy ? 'Connecting…' : 'Connect wallet', () => { const l = wallets(); if (!l.length) { Wal.noWallet = true; renderWallet(); return; } if (l.length === 1) connectWallet(l[0]); else { Wal.choosing = true; renderWallet(); } }, 'primary');
+    b.disabled = Wal.busy; sp(Wal.note || 'Connect any EVM wallet on Sepolia to join the raid. Watching needs no wallet.'); return;
+  }
+  const a = document.createElement('a'); a.className = 'addr'; a.href = scan('address', Wal.addr); a.target = '_blank'; a.rel = 'noopener'; a.textContent = short(Wal.addr); st.appendChild(a);
+  if (Wal.info && Wal.info.name) sp(Wal.info.name, 'badge');
+  if (Wal.chain === SEPOLIA) sp('Sepolia', 'badge ok'); else { sp(Wal.chain ? 'not on Sepolia' : 'network unknown', 'badge warn'); btn('Switch to Sepolia', async () => { try { await switchSepolia(); } catch {} render(); }); }
+  sp('Need test ETH? Use any Sepolia faucet.');
+  btn('Disconnect', disconnectWallet);
+}
+
+/* ---------- transactions ---------- */
+async function sendTx(data, label){
+  if (!Wal.addr || !Wal.prov) { toast('Connect a wallet first'); return null; }
+  if (Wal.chain !== SEPOLIA) { try { await switchSepolia(); } catch {} if (Wal.chain !== SEPOLIA) { toast('Switch the wallet to Sepolia first'); return null; } }
+  // simulate first so a known reason is shown instead of a failed transaction; leave gas headroom because more
+  // settled rounds may be applied to the boss before the transaction is mined
+  let gas = 900000;
+  try { await rpc('eth_call', [{ from: Wal.addr, to: RAID, data }, 'latest']); }
+  catch (e) { if (e.revert) { toast(errText(e)); return null; } }
+  try { const est = parseInt(await rpc('eth_estimateGas', [{ from: Wal.addr, to: RAID, data }]), 16); if (est > 0) gas = Math.min(15000000, Math.max(900000, est * 2 + 400000)); } catch {}
+  S.busy = true; render();
+  try {
+    let chainNow = null; try { chainNow = await Wal.prov.request({ method: 'eth_chainId' }); } catch {}
+    if (String(chainNow).toLowerCase() !== SEPOLIA) { toast('The wallet left Sepolia. Switch back to Sepolia and try again.'); return null; }
+    const hash = await Wal.prov.request({ method: 'eth_sendTransaction', params: [{ from: Wal.addr, to: RAID, data, value: '0x0', gas: '0x' + gas.toString(16), chainId: SEPOLIA }] });
+    if (typeof hash !== 'string' || !/^0x[0-9a-fA-F]{64}$/.test(hash)) throw new Error('No transaction hash');
+    toast(label + ' sent. Waiting for Sepolia…');
+    for (let i = 0; i < 60; i++) { await new Promise(r => setTimeout(r, 3000)); let rc = null; try { rc = await rpc('eth_getTransactionReceipt', [hash]); } catch {}
+      if (rc) { if (rc.status === '0x1') { const ch = (rc.logs || []).find(l => l.topics && l.topics[0] === EV.charged); const tc = (rc.logs || []).find(l => l.topics && l.topics[0] === EV.claimed);
+          toast(ch ? `Charged round ${fmt(Number(BigInt(ch.topics[2])))}! It lands when SqueekCore settles it.` : tc ? `${TIERS[Number(BigInt('0x' + words(tc.data)[0]))]} trophy claimed` : label + ' confirmed');
+          setTimeout(async () => { await refresh(true); }, 0); } else toast(label + ' failed on chain'); return rc; } }
+    toast(label + ' is taking long; check it on Etherscan'); return null;
+  } catch (e) { toast(errText(e)); return null; }
+  finally { S.busy = false; refresh(); }
+}
+
+/* ---------- rendering ---------- */
+const isRunning = () => { const m = S.status && S.status.measurement; return !!m && m.freshness !== 'stale' && Number(m.rpmMilli) > 0; };
+const roundNow = () => { const g = S.genesis || 1793735400, d = S.dur || 600; const r = Math.floor((Date.now() / 1000 - g) / d) + 1; return S.deployed ? Math.max(S.round, r) : r; };
+const roundLeft = r => Math.max(0, (S.genesis || 1793735400) + r * (S.dur || 600) - Date.now() / 1000);
+function render(){ try { renderNow(); } catch (e) { console.error('render', e); } }
+function renderNow(){
+  $('notDeployed').hidden = S.deployed || !S.checked;
+  setText('notDeployedTxt', !S.reach ? "Can't reach Sepolia right now; retrying." : 'The Wheel Raid contract is not deployed on Sepolia yet. The live wheel already works.');
+  const m = S.status && S.status.measurement; const run = isRunning();
+  setText('runTxt', S.statusErr > 1 && Date.now() - S.lastStatusAt > 30000 ? 'Wheel status unavailable' : !S.status ? 'Checking the wheel…' : m && m.freshness === 'stale' ? 'Wheel feed stale' : run ? 'Squeektoshi is running' : 'Squeektoshi is resting');
+  $('runDot').className = 'dot ' + (!S.status ? '' : run ? 'on' : m && m.freshness === 'stale' ? 'warn' : '');
+  setText('rRpm', run && m ? `${(Number(m.rpmMilli) / 1000).toFixed(0)} rpm` : '');
+  $('arena').classList.toggle('running', run);
+  const r = roundNow(); setText('rNow', fmt(r)); setText('rLeft', mmss(roundLeft(r)));
+  renderWallet(); renderBoss(r, run); renderBoard(); renderFeed(); renderHall();
+  const ln = $('links'); const lsig = String(S.deployed); if (ln.dataset.sig !== lsig) { ln.dataset.sig = lsig; ln.innerHTML = '';
+    if (S.deployed) { const a = document.createElement('a'); a.href = scan('address', RAID); a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'WheelRaid ' + short(RAID);
+      const c = document.createElement('a'); c.href = scan('address', CORE); c.target = '_blank'; c.rel = 'noopener'; c.textContent = 'SqueekCore ' + short(CORE); ln.append('Contracts: ', a, ' · ', c); }
+    else ln.textContent = 'Contract: not deployed yet'; }
+}
+function pop(text){ const p = document.createElement('div'); p.className = 'pop'; p.textContent = text; $('pops').appendChild(p); setTimeout(() => p.remove(), 1700); }
+function renderBoss(round, run){
+  const b = S.boss; const box = $('bossArt');
+  if (!b) { setText('bossName', S.deployed ? 'Summoning…' : 'Wheel Raid'); setText('bossEyebrow', 'The boss'); setText('hpTxt', '–'); setText('bossLvl', 'LV –');
+    setText('stNow', '–'); setText('stRally', '–'); setText('stPower', '–'); setText('stDmg', '–');
+    const act = $('actions'); if (act.dataset.sig !== 'none') { act.dataset.sig = 'none'; act.innerHTML = ''; $('chargeHint').textContent = S.deployed ? '' : 'The raid opens when the contract is live.'; }
+    return; }
+  // the image
+  const src = S.art.get(b.id + ':' + b.fate);
+  if (box.dataset.k !== b.id + ':' + b.fate + ':' + !!src) { box.dataset.k = b.id + ':' + b.fate + ':' + !!src; box.innerHTML = '';
+    if (src) { const im = document.createElement('img'); im.src = src; im.alt = b.name; im.onerror = () => im.remove(); box.appendChild(im); } else { const d = document.createElement('div'); d.className = 'ph'; d.textContent = b.name; box.appendChild(d); } }
+  if (S.lastBossId === b.id && S.lastDamage !== null && b.damage > S.lastDamage) { pop('-' + fmt(b.damage - S.lastDamage)); box.classList.remove('hit'); void box.offsetWidth; box.classList.add('hit'); }
+  if (S.lastBossId !== null && S.lastBossId !== b.id) toast(`A new boss appears: ${b.name}`);
+  S.lastBossId = b.id; S.lastDamage = b.damage;
+  setText('bossLvl', 'LV ' + b.level); setText('bossName', b.name);
+  setText('bossEyebrow', `Boss #${b.id + 1} · level ${b.level} · ${fmt(b.strikes)} strike${b.strikes === 1 ? '' : 's'} so far`);
+  const pct = 100 * b.hpLeft / b.maxHp; const ghost = Math.min(b.hpLeft, S.incoming);
+  $('hpFill').style.width = Math.max(0, pct - 100 * ghost / b.maxHp).toFixed(2) + '%'; $('hpGhost').style.width = pct.toFixed(2) + '%';
+  $('hpBar').setAttribute('aria-valuenow', String(Math.round(pct)));
+  setText('hpTxt', `${fmt(b.hpLeft)} / ${fmt(b.maxHp)}`);
+  setText('hpIncoming', S.incoming > 0 ? `−${fmt(S.incoming)} landing from ${S.applyable} settled round${S.applyable === 1 ? '' : 's'}` : '');
+  const fleeAt = (S.genesis || 0) + b.flee * (S.dur || 600);
+  setText('fleeTxt', b.fate === 0 ? (Date.now() / 1000 < fleeAt ? `flees in ${span(fleeAt - Date.now() / 1000)}` : 'about to flee') : '');
+  const nr = S.nowRound && round === S.round ? S.nowRound : { raiders: 0, power: 0 };
+  setText('stNow', fmt(nr.raiders)); setText('stRally', `+${rally(Math.max(1, nr.raiders + (S.me && S.me.lastCharge >= round ? 0 : 1))) - 100}%`);
+  setText('stPower', S.me ? `${(S.me.power / 100).toFixed(2)}×` : Wal.addr ? '…' : '–');
+  setText('stDmg', S.me ? fmt(S.me.onBoss) : '–');
+  // actions
+  const me = S.me; const left = roundLeft(round);
+  const charged = me && me.lastCharge >= round; const waiting = me ? me.pending.filter(p => p > S.settled).length : 0;
+  const sig = JSON.stringify([b.id, round, run, S.busy, Wal.addr, S.deployed, charged, waiting, me && me.pending.length, S.applyable, S.settled]);
+  const act = $('actions'), hint = $('chargeHint'), q = $('myQueue');
+  if (act.dataset.sig === sig) { const c = $('countdown'); if (c) c.textContent = mmss(left); return; }
+  act.dataset.sig = sig; act.innerHTML = ''; hint.innerHTML = ''; q.innerHTML = '';
+  const btn = (t, f, cls, dis) => { const x = document.createElement('button'); x.type = 'button'; x.className = 'btn' + (cls ? ' ' + cls : ''); x.textContent = t; x.disabled = !!dis || S.busy; x.addEventListener('click', f); act.appendChild(x); return x; };
+  const bold = t => { const e = document.createElement('b'); e.textContent = t; return e; };
+  if (!Wal.addr) { btn('Connect to charge', () => { const l = wallets(); if (!l.length) { Wal.noWallet = true; renderWallet(); return; } if (l.length === 1) connectWallet(l[0]); else { Wal.choosing = true; renderWallet(); } }, 'charge');
+    hint.append(bold(run ? 'Squeektoshi is running!' : "He's resting."), run ? ' Connect a wallet and charge this round to hit the boss with his real work.' : ' Connect a wallet now; charge when he starts running (usually 21:00 to 07:00 UTC).'); }
+  else if (charged) { btn(`Charged round ${fmt(round)} ✓`, () => {}, 'done', true);
+    const c = document.createElement('span'); c.id = 'countdown'; c.textContent = mmss(left);
+    hint.append(bold('Charged.'), ' Next round in ', c, `. Your hit lands when SqueekCore settles it (settled through round ${fmt(S.settled)} right now).`); }
+  else { const full = me && me.pending.length >= 24 && !me.pending.some(p => p <= S.settled);
+    const x = btn(`${run ? 'Charge!' : 'Charge'} · round ${fmt(round)}`, () => sendTx(SEL.charge, 'Charge'), 'charge' + (run ? ' hot' : ''), full);
+    x.setAttribute('aria-label', `Charge the boss in round ${round}`);
+    if (run) hint.append(bold('Squeektoshi is running!'), ' Charge now: if the wheel keeps turning, you hit for the round\'s real work.');
+    else hint.append(bold("He's resting."), ' A charge now will most likely miss. He usually runs around 21:00 to 07:00 UTC.'); }
+  if (S.applyable > 0) btn(`Apply ${S.applyable} settled hit${S.applyable === 1 ? '' : 's'}`, () => sendTx(SEL.advance + pad(48), 'Applying hits'), '', !Wal.addr);
+  if (me) for (const p of me.pending) { const li = document.createElement('li'); li.className = 'badge ' + (p <= S.settled ? 'ok' : 'warn'); li.textContent = `round ${fmt(p)} · ${p <= S.settled ? 'settled, landing' : 'waiting for settlement'}`; q.appendChild(li); }
+}
+function renderBoard(){
+  const tb = $('board'); const b = S.boss;
+  const sig = S.board.map(r => [r.addr, r.onBoss, r.charges, r.power].join(':')).join('|') + '|' + (Wal.addr || '') + S.deployed + (b && b.id);
+  if (tb.dataset.sig === sig) return; tb.dataset.sig = sig; tb.innerHTML = '';
+  setText('boardCount', S.deployed && b ? `${fmt(S.board.length)} raider${S.board.length === 1 ? '' : 's'} on boss #${b.id + 1}` : '');
+  if (!S.board.length) { const tr = document.createElement('tr'); const td = document.createElement('td'); td.colSpan = 7; td.className = 'sub'; td.textContent = S.deployed ? 'Nobody has charged this boss yet. Be the first.' : 'The board opens when the contract is live.'; tr.appendChild(td); tb.appendChild(tr); return; }
+  S.board.slice(0, 100).forEach((r, i) => {
+    const tr = document.createElement('tr'); if (Wal.addr && r.addr.toLowerCase() === Wal.addr.toLowerCase()) tr.className = 'me';
+    const td = (t, cls) => { const e = document.createElement('td'); if (cls) e.className = cls; if (t instanceof Node) e.appendChild(t); else e.textContent = t; tr.appendChild(e); return e; };
+    const rk = document.createElement('span'); rk.className = 'rank' + (i < 3 && r.onBoss > 0 ? ' r' + (i + 1) : ''); rk.textContent = String(i + 1); td(rk);
+    const a = document.createElement('a'); a.className = 'addr'; a.href = scan('address', r.addr); a.target = '_blank'; a.rel = 'noopener'; a.textContent = short(r.addr); const cell = td(a);
+    if (r.power > 100) { const pk = document.createElement('span'); pk.className = 'perk'; pk.textContent = r.power >= 150 ? '✦✦ Squeek + Wheeling' : '✦ perk'; cell.appendChild(pk); }
+    td((r.power / 100).toFixed(2) + '×', 'num'); td(fmt(r.onBoss), 'num'); td(b ? (100 * r.onBoss / b.maxHp).toFixed(1) + '%' : '–', 'num');
+    if (r.onBoss > 0 && b) { const t = tierOf(r.onBoss, b.maxHp); const s = document.createElement('span'); s.className = 'tier t' + t; s.textContent = TIERS[t]; td(s); } else td('–');
+    td(fmt(r.charges), 'num'); tb.appendChild(tr);
+  });
+}
+function renderFeed(){
+  const ul = $('feed'); const sig = S.feed.map(f => f.tx + f.k + f.li).join('|') + S.deployed + S.feedErr; if (ul.dataset.sig === sig) return; ul.dataset.sig = sig; ul.innerHTML = '';
+  if (!S.feed.length) { const li = document.createElement('li'); li.className = 'sub'; li.textContent = S.feedErr ? "Couldn't load the contract's events right now; retrying." : S.deployed ? 'No hits yet. The first charged round that settles shows up here.' : 'The raid log appears once the contract is live.'; ul.appendChild(li); return; }
+  for (const f of S.feed) { const li = document.createElement('li'); const ic = document.createElement('span'); ic.className = 'ic'; const s = document.createElement('span'); s.className = 'txt';
+    if (f.k === 'struck') { ic.textContent = f.work > 0 ? '⚔️' : '💨'; s.textContent = f.work > 0 ? `Round ${fmt(f.round)}: ${f.raiders} raider${f.raiders === 1 ? '' : 's'} charged, he ran ${fmt(f.work)} → ${fmt(f.dmg)} damage${f.raiders > 1 ? ` (rally +${rally(f.raiders) - 100}%)` : ''} · ${fmt(f.left)} HP left` : `Round ${fmt(f.round)}: ${f.raiders} raider${f.raiders === 1 ? '' : 's'} charged a still wheel. Miss.`; }
+    else if (f.k === 'defeated') { li.className = 'kill'; ic.textContent = '🏆'; s.textContent = `Boss #${f.boss + 1} fell in round ${fmt(f.round)}! Trophies are open.`; }
+    else if (f.k === 'fled') { li.className = 'flee'; ic.textContent = '🌫️'; s.textContent = `Boss #${f.boss + 1} fled after a week standing.`; }
+    else if (f.k === 'spawned') { ic.textContent = '👹'; s.textContent = `Boss #${f.boss + 1} appeared: level ${f.level}, ${fmt(f.hp)} HP.`; }
+    else { ic.textContent = '🎖️'; s.textContent = `${short(f.who)} claimed a ${TIERS[f.tier]} trophy for boss #${f.boss + 1}${f.kb ? ' (killing blow)' : ''}.`; }
+    const a = document.createElement('a'); a.className = 't'; a.href = scan('tx', f.tx); a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'tx ↗'; li.append(ic, s, a); ul.appendChild(li); }
+}
+function renderHall(){
+  const el = $('hall'); const sig = S.past.map(b => [b.id, b.fate, !!b.src, b.mine, b.trophy, !!b.trophyImg].join(':')).join('|') + (Wal.addr || '') + S.busy + S.deployed;
+  if (el.dataset.sig === sig) return; el.dataset.sig = sig; el.innerHTML = '';
+  setText('hallSub', S.past.length ? `${S.past.filter(b => b.fate === 1).length} fallen · ${S.past.filter(b => b.fate === 2).length} fled` : '');
+  if (!S.past.length) { const p = document.createElement('p'); p.className = 'empty'; p.textContent = S.deployed ? 'No boss has fallen yet. The first one is still standing above.' : 'Fallen bosses and trophies appear here.'; el.appendChild(p); return; }
+  for (const b of S.past) { const c = document.createElement('div'); c.className = 'card';
+    const im = document.createElement('img'); im.alt = b.name; im.width = 400; im.height = 400; const src = b.trophyImg || b.src; if (src) { im.src = src; im.onerror = () => im.remove(); c.appendChild(im); }
+    const f = document.createElement('span'); f.className = 'fate f' + b.fate; f.textContent = b.fate === 1 ? `Fell in round ${fmt(b.end)}` : 'Fled'; c.appendChild(f);
+    const h = document.createElement('h3'); h.textContent = b.name; c.appendChild(h);
+    const meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = `Boss #${b.id + 1} · LV ${b.level} · ${fmt(b.maxHp)} HP · ${fmt(b.strikes)} strikes`; c.appendChild(meta);
+    if (Wal.addr && b.fate === 1) { const m2 = document.createElement('div'); m2.className = 'meta';
+      if (b.trophy) m2.textContent = `${b.trophyName || 'Trophy'} · yours`;
+      else if (b.mine > 0) { m2.textContent = `You dealt ${fmt(b.mine)} (${TIERS[tierOf(b.mine, b.maxHp)]})`; const x = document.createElement('button'); x.type = 'button'; x.className = 'btn primary'; x.textContent = 'Claim trophy'; x.disabled = S.busy; x.addEventListener('click', () => sendTx(SEL.claim + pad(b.id), 'Claim')); c.append(m2, x); el.appendChild(c); continue; }
+      else m2.textContent = 'You were not in this fight.';
+      c.appendChild(m2); }
+    el.appendChild(c); }
+}
+
+/* ---------- polling ---------- */
+let inFlight = false, again = false, wantFull = false;
+async function refresh(full){
+  if (full) wantFull = true;
+  if (inFlight) { again = true; render(); return; } inFlight = true;
+  try { do { again = false; try { await loadChain(); } catch {} render();
+      if (wantFull) { wantFull = false; try { await loadBoard(); await loadHall(); await loadFeed(); } catch {} render(); } } while (again || wantFull); }
+  finally { inFlight = false; }
+}
+async function boot(){
+  render();
+  loadStatus().then(() => { S.statusErr = 0; }, () => { S.statusErr++; }).finally(render);   // never blocks startup
+  try { S.deployed = await checkDeployed(); } catch { S.deployed = false; }
+  S.checked = true;
+  await refresh(true);
+  setInterval(async () => { try { await loadStatus(); S.statusErr = 0; } catch { S.statusErr++; } render(); }, 10000);
+  setInterval(() => refresh(false), 20000);
+  setInterval(async () => { try { await loadBoard(); await loadHall(); await loadFeed(); } catch {} render(); }, 60000);
+  setInterval(render, 1000);
+}
+window.__raid = { S, Wal, decode, refresh };
+boot();
+})();
+</script>
+</body>
+</html>
