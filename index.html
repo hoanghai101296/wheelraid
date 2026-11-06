@@ -242,7 +242,7 @@ footer a{color:var(--mute)}
   </section>
 
   <section class="panel" aria-labelledby="howTitle">
-    <div class="phead"><h2 id="howTitle">How the raid works</h2><span class="sub">Every number comes from SqueekCore on Sepolia.</span></div>
+    <div class="phead"><h2 id="howTitle">How the raid works</h2><span class="sub">Every number comes from SqueekCore on Sepolia. Nothing here makes Squeektoshi run: the raid only reads his wheel.</span></div>
     <div class="steps">
       <div class="step"><span class="n">1</span><h3>Charge</h3><p>While Squeektoshi runs, charge the 10-minute round in progress. One charge per wallet per round, free on Sepolia.</p></div>
       <div class="step"><span class="n">2</span><h3>Settle</h3><p>When SqueekCore settles the round, everyone who charged it hits the boss for the round's real wheel work. A still wheel is a miss.</p></div>
@@ -411,9 +411,12 @@ async function loadFeed(){
   const head = parseInt(await rpc('eth_blockNumber', []), 16);
   const logs = []; let to = head; const floor = Math.max(DEPLOY_BLOCK, head - 60000);
   try {
+    // the first chunk ends at 'latest': load-balanced RPCs can sit a block or two behind the head we just read
+    const get = (from, top) => rpc('eth_getLogs', [{ address: RAID, topics: [[EV.struck, EV.defeated, EV.fled, EV.spawned, EV.claimed]], fromBlock: '0x' + from.toString(16), toBlock: top }]);
+    let top = 'latest';
     while (to >= floor && logs.length < 40) { const from = Math.max(floor, to - 9999);
-      const part = await rpc('eth_getLogs', [{ address: RAID, topics: [[EV.struck, EV.defeated, EV.fled, EV.spawned, EV.claimed]], fromBlock: '0x' + from.toString(16), toBlock: '0x' + to.toString(16) }]);
-      if (Array.isArray(part)) logs.unshift(...part); to = from - 1; }
+      let part; try { part = await get(from, top); } catch { await new Promise(r => setTimeout(r, 1500)); part = await get(from, top); }
+      if (Array.isArray(part)) logs.unshift(...part); to = from - 1; top = '0x' + to.toString(16); }
     S.feedErr = false;
   } catch { S.feedErr = true; return; }
   const out = [];
